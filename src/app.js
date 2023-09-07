@@ -43,12 +43,11 @@ app.post("/pastes", (req, res, next) => {
 app.get("/pastes", (req, res) => {
   res.json({ data: pastes });
 });
+
 // Not found handler
 app.use((request, response, next) => {
   next(`Not found: ${request.originalUrl}`);
 });
-
-
 
 // Error handler
 app.use((error, request, response, next) => {
