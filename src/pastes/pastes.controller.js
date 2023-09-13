@@ -63,6 +63,7 @@ function pasteExists(req, res, next) {
   const { pasteId } = req.params;
   const foundPaste = pastes.find((paste) => paste.id === Number(pasteId));
   if (foundPaste) {
+    res.locals.paste = foundPaste;
     return next();
   }
   next({
@@ -71,10 +72,8 @@ function pasteExists(req, res, next) {
   });
 }
 
-function read(req, res) {
-  const { pasteId } = req.params;
-  const foundPaste = pastes.find((paste) => paste.id === Number(pasteId));
-  res.json({ data: foundPaste });
+function read(req, res, next) {
+  res.json({ data: res.locals.paste });
 }
 
 function create(req, res) {
@@ -93,6 +92,28 @@ function create(req, res) {
   res.status(201).json({ data: newPaste });
 }
 
+function update(req, res) {
+  const paste = res.locals.paste;
+  const { data: { name, syntax, expiration, exposure, text } = {} } = req.body;
+
+  // Update the paste
+  paste.name = name;
+  paste.syntax = syntax;
+  paste.expiration = expiration;
+  paste.exposure = exposure;
+  paste.text = text;
+
+  res.json({ data: paste });
+}
+
+function destroy(req, res) {
+  const { pasteId } = req.params;
+  const index = pastes.findIndex((paste) => paste.id === Number(pasteId));
+  // `splice()` returns an array of the deleted elements, even if it is one element
+  const deletedPastes = pastes.splice(index, 1);
+  res.sendStatus(204);
+}
+
 module.exports = {
   create: [
     bodyDataHas("name"),
@@ -108,4 +129,17 @@ module.exports = {
   ],
   list,
   read: [pasteExists, read],
+  update: [
+    pasteExists,
+    bodyDataHas("name"),
+    bodyDataHas("syntax"),
+    bodyDataHas("exposure"),
+    bodyDataHas("expiration"),
+    bodyDataHas("text"),
+    exposurePropertyIsValid,
+    syntaxPropertyIsValid,
+    expirationIsValidNumber,
+    update,
+  ],
+  delete: [pasteExists, destroy],
 };
