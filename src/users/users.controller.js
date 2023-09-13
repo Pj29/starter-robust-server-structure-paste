@@ -24,4 +24,5 @@ function read(req, res, next) {
 module.exports = {
   list,
   read: [userExists, read],
+  userExists,
 };

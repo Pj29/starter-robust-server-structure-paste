@@ -9,6 +9,7 @@ app.use(express.json());
 
 app.use("/users", usersRouter);
 app.use("/pastes", pastesRouter); // Note: app.use
+
 // Not found handler
 app.use((request, response, next) => {
   next({ status: 404, message: `Paste id not found: ${pasteId}` });
